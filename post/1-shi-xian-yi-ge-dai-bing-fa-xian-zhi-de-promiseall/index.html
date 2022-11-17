@@ -1,0 +1,252 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>实现一个带并发限制的Promise.all | Youmeng</title>
+
+<link rel="shortcut icon" href="http://www.youmeng.me/favicon.ico?v=1668654590389">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="http://www.youmeng.me/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-190442088-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+        gtag('config', 'UA-190442088-1');
+    </script>
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <a href="/">
+            <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Youmeng
+        </div>
+        </a>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tag/MgmHpMmv1" class="menu gt-a-link">
+                            力扣
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1668654590389" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    实现一个带并发限制的Promise.all
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2021-07-28 23:31:18 ·
+                    </time>
+                    
+                        <a href="http://www.youmeng.me/tag/bnC1lXud-/" class="post-tags">
+                            # Promise
+                        </a>
+                    
+                        <a href="http://www.youmeng.me/tag/ssvEO1-bBb/" class="post-tags">
+                            # 面试题
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <p>头条的一道面试题~~~ emm 有点意思🤒<br>
+✍️业务开发中也有用武之地。</p>
+<!-- more -->
+<p>在业务开发中，如用户进入页面，一般会通过http请求像服务端获取数据，而且大多数情况下会有多个http请求。我们一般使用<code>Promise.all</code>来调用接口，以达到更快速度的拿到数据渲染页面。<code>Promise.all</code>会在数组中的所有promise达到<code>resolve</code>状态后，才会去执行<code>.then</code>的回调。</p>
+<p>但是这样也给服务器带来了更大的压力。可以想象一种情况，如果页面上有10w+请求待处理(这里暂不考虑浏览器的请求并发限制)，你又只能在拿到所有请求的结果后才能多结果进行处理。这种情况下，大家理所当然的想到了<code>Promise.all</code>。但是面对洪水般的请求，服务器可能会出现<code>TCP </code>连接数不足照成等待或拒绝连接。</p>
+<p>这个时候我们就需要对<code>Promise.all</code>进行并发限制。</p>
+<p><code>Promise.all</code>并发限制指的是如果有10个请求，并发限制是5。那么会在执行的一瞬间发出请求<code>1, 2, 3, 4, 5</code>，当这5个请求中任意一个成功或失败后，继续请求<code>6</code>，循环往复，直至10个请求全部完成。然后一次性返回所有请求的结果。从表现上来看和原来的<code>Promise.all</code>没有任何区别。</p>
+<h2 id="大致思路">🤔大致思路</h2>
+<ol>
+<li><code>await</code>一个promise会暂停当前代码段继续往下执行，直到promise发生改变。</li>
+<li><code>Promise.race(promises)</code>会在<code>promises</code>中任意一个promise发生状态改变时返回结果。</li>
+<li>如果依次循环所有待执行的请求，将其放入待执行列表中，数量达到并发限制时，使用<code>await Promise.race</code>暂停代码段并执行这些请求</li>
+<li><code>Promise.race</code>状态发生改变，继续循环，直至执行完所有请求。</li>
+</ol>
+<blockquote>
+<p>读到这里是否有思路了呢？如果有，那就自己先写着试试。看答案和思考得到的结果记忆深度是不一样的哦~~</p>
+</blockquote>
+<h2 id="代码实现">😏代码实现</h2>
+<ol>
+<li>定义两个变量,<code>array</code>表示待执行的函数列表，<code>limit</code>表示并发限制</li>
+<li>遍历待执行的函数数组
+<ol>
+<li>从<code>array</code>第1个元素开始，初始化<code>promise</code>对象，同时用一个<code>executing</code>数组保存正在执行的promise，并将其存放于<code>ret</code>中</li>
+<li>循环初始化promise，直到达到<code>limt</code></li>
+<li>使用<code>await Promise.race</code>，暂停<code>for</code>循环，并执行<code>executing</code>中的promise。</li>
+<li>当<code>executing</code>中有任意一个promise执行完毕，就继续<code>for</code>循环，不断初始化promise并放入<code>executing</code>中，知道达到<code>limit</code></li>
+<li>当所有promise都执行完了，调用<code>Promise.all</code>返回</li>
+</ol>
+</li>
+</ol>
+<pre><code class="language-js">async function asyncPool(array, limit) {
+	// 存储Promise的执行结果  
+  const ret = []
+  // 正在执行的promise
+  const executing = []  
+
+  // 遍历待执行的函数列表
+  for (const item of array) {
+    // promise包装并执行当前待执行函数
+    const p = Promise.resolve().then(() =&gt; item(1))
+    // 将函数存至ret结果列表中(p此时是 Promise { &lt;pending&gt; })
+    ret.push(p)
+    if (limit &lt;= array.length) {
+      // 在p.then执行的时候说明p的状态已经发生了翻转(resolve || reject),
+      // 此时将executing列表删除一个
+      p.then(() =&gt; executing.splice(0, 1))
+      // 将p存放至executing中
+      executing.push(p)
+     
+      // executing内的待执行数量大于等于limit的时候，使用await Promise.race暂停for循环，
+      // executing中任意一个promise发生状态改变，就会继续循环
+      if (executing.length &gt;= limit) await Promise.race(executing)
+    }
+  }
+  
+  return Promise.all(ret)
+}
+
+asyncPool([], 10).then(result =&gt; console.log(result))
+</code></pre>
+<h2 id="测试用例">😌测试用例</h2>
+<pre><code class="language-js">const delay = s =&gt; new Promise(resolve =&gt; setTimeout(resolve, s * 1000))
+
+async function request(index) {
+  console.log(`Request: ${index}`)
+  await delay(1)
+  console.log(`Response: ${index}`)
+  return index
+}
+
+const pool = [...new Array(50).keys()].fill(request)
+asyncPool(pool, 10).then(result =&gt; console.log(result))
+
+</code></pre>
+<h2 id="总结">😌总结</h2>
+<p>这个面试题主要考了多<code>Promise</code>的理解与运用，网上有很多个版本的实现，递归调用的居多。emmm...我不喜欢递归，所以没用递归。</p>
+<p>温故而知新，如果记得不是很深刻，建议<code>Ctrl + D</code>收藏到书签，下次访问更便捷。</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">😍 你多努力一点，获得的打击就多一点 😍</div>
+    <div class="social-container">
+        
+            
+                <a href="https://www.youmeng.me" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a href="/atom.xml" target="_blank">RSS</a> | <a href="/archives.xml" target="_blank">Archives</a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

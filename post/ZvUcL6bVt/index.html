@@ -1,0 +1,223 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>【LeetCode】 6. Z 字形变换 | Youmeng</title>
+
+<link rel="shortcut icon" href="http://www.youmeng.me/favicon.ico?v=1668654590389">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="http://www.youmeng.me/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-190442088-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+        gtag('config', 'UA-190442088-1');
+    </script>
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <a href="/">
+            <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Youmeng
+        </div>
+        </a>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tag/MgmHpMmv1" class="menu gt-a-link">
+                            力扣
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1668654590389" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    【LeetCode】 6. Z 字形变换
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2021-08-03 22:45:09 ·
+                    </time>
+                    
+                        <a href="http://www.youmeng.me/tag/evhLTI3hV/" class="post-tags">
+                            # Medium
+                        </a>
+                    
+                        <a href="http://www.youmeng.me/tag/MgmHpMmv1/" class="post-tags">
+                            # LeetCode
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <figure data-type="image" tabindex="1"><img src="https://cdn.youmeng.me/blog/2021-08-17-134310.png" alt="" loading="lazy"></figure>
+<h2 id="原题">原题</h2>
+<p><a href="https://leetcode-cn.com/problems/zigzag-conversion/">6. Z 字形变换</a></p>
+<h2 id="解题思路">解题思路</h2>
+<h3 id="对题目的理解">对题目的理解</h3>
+<ol>
+<li>字符串<code>s</code>是以一个变形的<code>Z</code>字为顺序存储的，结果需要横向逐行输出。</li>
+<li>通过第一条，联想到二维数组。数组中有<code>numRows</code>个数组，分别为a<sub>1</sub> ,a<sub>2</sub>, a<sub>3</sub> ... a<sub>n</sub>，向数组中<code>push</code>的顺序(行索引)先增大，在减小，再增大.....反复，直至循环到字符串<code>s</code>结束。</li>
+<li>综上所诉，定义两个变量，一个控制行号<code>rowIndex</code>,向哪一行<code>push</code>。一个控制方向<code>direction</code>，向哪个方向push。</li>
+</ol>
+<h3 id="show-code">show code</h3>
+<pre><code class="language-ts">function convert(s: string, numRows: number): string {
+  if (s.length &lt;= numRows || numRows === 1) return s
+  const resArr = []
+  const len = s.length
+  let rowIndex = 0
+  let direction = 'down' // up / down
+
+  function set(rowIndex, val) {
+    if (!resArr[rowIndex]) resArr[rowIndex] = []
+    resArr[rowIndex].push(val)
+  }
+
+  for (let strIndex = 0; strIndex &lt; len; strIndex++) {
+    const r = strIndex % (numRows - 1)
+    if (r === 0) direction = direction === 'up' ? 'down' : 'up'
+
+   set(rowIndex, s[strIndex])
+
+    if (direction === 'up') {
+      rowIndex ++
+    } else {
+      rowIndex--
+    }
+  }
+  return resArr.flat(2).join('')
+}
+console.log(convert(&quot;PAYPALISHIRING&quot;, 3))
+</code></pre>
+<h2 id="总结">总结</h2>
+<p>感觉写复杂了，这个得改改~</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="http://www.youmeng.me/post/cFOWvAM95/" class="post-title gt-a-link">
+                    【LeetCode】3. 无重复字符的最长子串
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">😍 你多努力一点，获得的打击就多一点 😍</div>
+    <div class="social-container">
+        
+            
+                <a href="https://www.youmeng.me" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a href="/atom.xml" target="_blank">RSS</a> | <a href="/archives.xml" target="_blank">Archives</a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>
