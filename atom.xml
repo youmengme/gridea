@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://www.youmeng.me</id>
+    <title>Youmeng</title>
+    <updated>2025-12-24T10:30:24.407Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://www.youmeng.me"/>
+    <link rel="self" href="https://www.youmeng.me/atom.xml"/>
+    <subtitle>温故而知新</subtitle>
+    <logo>https://www.youmeng.me/images/avatar.png</logo>
+    <icon>https://www.youmeng.me/favicon.ico</icon>
+    <rights>All rights reserved 2025, Youmeng</rights>
+    <entry>
+        <title type="html"><![CDATA[纯CSS实现元素水平无限滚动]]></title>
+        <id>https://www.youmeng.me/post/chun-css-shi-xian-yuan-su-shui-ping-wu-xian-gun-dong/</id>
+        <link href="https://www.youmeng.me/post/chun-css-shi-xian-yuan-su-shui-ping-wu-xian-gun-dong/">
+        </link>
+        <updated>2024-12-04T08:12:16.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[前端监控系列3 ｜ 如何衡量一个站点的性能好坏]]></title>
+        <id>https://www.youmeng.me/post/qian-duan-jian-kong-xi-lie-3-or-ru-he-heng-liang-yi-ge-zhan-dian-de-xing-neng-hao-pi/</id>
+        <link href="https://www.youmeng.me/post/qian-duan-jian-kong-xi-lie-3-or-ru-he-heng-liang-yi-ge-zhan-dian-de-xing-neng-hao-pi/">
+        </link>
+        <updated>2024-07-29T01:34:55.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[前端监控系列2 ｜ 聊聊 JS 错误监控那些事儿]]></title>
+        <id>https://www.youmeng.me/post/qian-duan-jian-kong-xi-lie-2-or-liao-liao-js-cuo-wu-jian-kong-na-xie-shi-er/</id>
+        <link href="https://www.youmeng.me/post/qian-duan-jian-kong-xi-lie-2-or-liao-liao-js-cuo-wu-jian-kong-na-xie-shi-er/">
+        </link>
+        <updated>2024-07-29T01:34:29.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[前端监控系列1｜ 字节的前端监控SDK是怎样设计的]]></title>
+        <id>https://www.youmeng.me/post/qian-duan-jian-kong-xi-lie-1or-zi-jie-de-qian-duan-jian-kong-sdk-shi-zen-yang-she-ji-de-jue-jin/</id>
+        <link href="https://www.youmeng.me/post/qian-duan-jian-kong-xi-lie-1or-zi-jie-de-qian-duan-jian-kong-sdk-shi-zen-yang-she-ji-de-jue-jin/">
+        </link>
+        <updated>2024-07-29T01:33:44.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[使用Rollup高效打包Taro组件库]]></title>
+        <id>https://www.youmeng.me/post/shi-yong-rollup-gao-xiao-da-bao-taro-zu-jian-ku/</id>
+        <link href="https://www.youmeng.me/post/shi-yong-rollup-gao-xiao-da-bao-taro-zu-jian-ku/">
+        </link>
+        <updated>2024-07-12T10:19:35.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[使用 `pnpm link` 进行本地包的链接与测试]]></title>
+        <id>https://www.youmeng.me/post/shi-yong-pnpm-link-jin-xing-ben-di-bao-de-lian-jie-yu-ce-shi/</id>
+        <link href="https://www.youmeng.me/post/shi-yong-pnpm-link-jin-xing-ben-di-bao-de-lian-jie-yu-ce-shi/">
+        </link>
+        <updated>2024-07-08T07:14:43.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[如何写好提示词（Prompt）？]]></title>
+        <id>https://www.youmeng.me/post/ru-he-xie-hao-ti-shi-ci-prompt/</id>
+        <link href="https://www.youmeng.me/post/ru-he-xie-hao-ti-shi-ci-prompt/">
+        </link>
+        <updated>2024-06-28T02:51:39.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[vercel+cloudflare配合绕过vercel项目无法访问问题]]></title>
+        <id>https://www.youmeng.me/post/vercelcloudflare-pei-he-rao-guo-vercel-xiang-mu-wu-fa-fang-wen-wen-ti/</id>
+        <link href="https://www.youmeng.me/post/vercelcloudflare-pei-he-rao-guo-vercel-xiang-mu-wu-fa-fang-wen-wen-ti/">
+        </link>
+        <updated>2024-06-28T02:30:15.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[如何通过飞书API获取多维表格数据]]></title>
+        <id>https://www.youmeng.me/post/ru-he-tong-guo-fei-shu-api-huo-qu-duo-wei-biao-ge-shu-ju/</id>
+        <link href="https://www.youmeng.me/post/ru-he-tong-guo-fei-shu-api-huo-qu-duo-wei-biao-ge-shu-ju/">
+        </link>
+        <updated>2024-06-25T09:33:25.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[深入理解 `promiseWithResolvers` 与单例 API 包装处理重复请求]]></title>
+        <id>https://www.youmeng.me/post/shen-ru-li-jie-promisewithresolvers-yu-dan-li-api-bao-zhuang-chu-li-chong-fu-qing-qiu/</id>
+        <link href="https://www.youmeng.me/post/shen-ru-li-jie-promisewithresolvers-yu-dan-li-api-bao-zhuang-chu-li-chong-fu-qing-qiu/">
+        </link>
+        <updated>2024-06-19T09:29:18.000Z</updated>
+    </entry>
+</feed>

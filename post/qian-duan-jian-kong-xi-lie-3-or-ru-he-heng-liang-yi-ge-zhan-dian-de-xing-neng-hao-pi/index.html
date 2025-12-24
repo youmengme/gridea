@@ -1,0 +1,386 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>前端监控系列3 ｜ 如何衡量一个站点的性能好坏 | Youmeng</title>
+
+<link rel="shortcut icon" href="https://www.youmeng.me/favicon.ico?v=1766572218032">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://www.youmeng.me/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<script>
+  document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+      // 检查当前是否为深色模式
+      function isDarkMode() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+
+      // 检查当前是否为浅色模式
+      function isLightMode() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      }
+
+      // 更新body的id根据当前颜色模式
+      function updateBodyId() {
+        const bodyElement = document.body;
+        if (isDarkMode()) {
+          bodyElement.id = 'dark';
+        } else if (isLightMode()) {
+          bodyElement.id = 'light';
+        } else {
+          bodyElement.removeAttribute('id');
+        }
+      }
+
+      // 初始检查和设置body的id
+      updateBodyId();
+
+      // 监听颜色模式的变化
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        updateBodyId();
+      });
+    });
+</script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div>
+            <a href="https://www.youmeng.me"  class="site-name gt-c-content-color-first">
+                Youmeng
+            </a>
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://www.youmeng.me/post/mei-zhou-ji-zhu-wen-zhang" class="menu gt-a-link">
+                            每周技术阅读
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1766572218032" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    前端监控系列3 ｜ 如何衡量一个站点的性能好坏
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2024-07-29 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <blockquote>
+<p>原文链接： URL Source: https://juejin.cn/post/7130830761137012766</p>
+</blockquote>
+<p>Markdown Content:</p>
+<blockquote>
+<p>作者：彭莉，火山引擎 APM 研发工程师。2020年加入字节，负责前端监控 SDK 的开发维护、平台数据消费的探索和落地。</p>
+</blockquote>
+<h2 id="背景">背景</h2>
+<p>你知道有多少用户没等到页面首屏出现就离开了吗？性能不佳会对业务目标产生负面影响。比如， BBC 发现他们的网站加载时间每增加一秒，他们就会失去 10% 的用户。<strong>高性能站点比低性能站点更能吸引和留住用户，而留住用户对于提高用户转化率至关重要。</strong></p>
+<p>这篇文章就是以此为背景，介绍字节内部是如何衡量站点性能的，如何依靠性能监控定位线上站点性能问题的。</p>
+<h2 id="如何衡量站点性能">如何衡量站点性能</h2>
+<p>站点性能好坏的表现形式是多样的，不是单纯通过页面加载速度、页面渲染速度就能衡量，<strong>而是要关注从页面开始加载到被关闭的整个过程中，用户对性能的感知</strong>。一个页面，即使很快渲染，如果对用户的交互迟迟没有响应，那么在用户心中这个站点的性能依然很差。</p>
+<p>站点性能一般可以分为两类，一类是首屏性能，另一类是运行时性能。前者衡量的是页面从加载开始到可以稳定交互的性能情况，后者衡量的是页面稳定后到页面关闭的性能情况。</p>
+<h2 id="首屏性能">首屏性能</h2>
+<p>早在 2012 年， Web 性能工作组[1] 就针对页面加载场景制定了加载过程模型，用来衡量页面加载各个阶段的耗时情况，从而衡量页面加载的性能。具体的加载过程模型如图所示：</p>
+<figure data-type="image" tabindex="1"><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/dfcdf0346eec4f3885a140fcdb5ab09b~tplv-k3u1fbpfcp-zoom-in-crop-mark:1512:0:0:0.awebp" alt="Image 1: 图片" loading="lazy"></figure>
+<p>这个模型定义了页面加载开始到页面加载完成整个过程的各个时间点，除了正常的初始化并且拉取到主文档的时间点以外，还包括了解析渲染的详细时间点。比如：</p>
+<ul>
+<li>domLoading 代表 开始解析的时间点</li>
+<li>domInteractive 代表 DOM 解析完成、开始加载内嵌资源的时间点</li>
+<li>domComplete 代表 文档解析完成的时间点</li>
+<li>loadEventStart 代表 load 事件被触发的时间点</li>
+</ul>
+<p><strong>虽然开发者可以根据这些时间点来衡量页面加载时的性能情况，但是线上用户其实感知不到这些时间点的区别</strong>。对于用户而言，只能感知到页面何时开始渲染、何时渲染出主要内容、何时可以交互、以及交互时是否有延迟。</p>
+<p>那么针对用户感知到的这四个阶段，有没有可用于衡量的指标呢？</p>
+<h3 id="何时开始渲染fp-fcp">何时开始渲染：FP &amp;&amp; FCP</h3>
+<ul>
+<li>FP：First Paint，首次渲染的时间点。FP 时间点之前，用户看到的都是没有任何内容的白色屏幕。</li>
+<li>FCP：First Contentful Paint，首次有实际内容渲染的时间点。</li>
+</ul>
+<p>这两个指标都来源于 Paint Timing[2] 标准， 这个标准主要是记录在页面加载期间的一些关键时间点。通过这两个指标，就可以衡量页面何时开始渲染内容了。</p>
+<h3 id="何时渲染出主要内容fmp-lcp-si">何时渲染出主要内容：FMP &amp;&amp; LCP &amp;&amp; SI</h3>
+<ul>
+<li>FMP：First Meaningful Paint，完成首次有意义内容绘制的时间点。</li>
+<li>LCP：Largest Contentful Paint，最大的内容在可视区域内变得可见的时间点。</li>
+<li>SI：Speed Index，衡量页面可视区域的加载速度，反映页面的加载体验差异。</li>
+</ul>
+<p>有了这三个指标，就可以衡量页面何时渲染出主要内容了。不过业界有测试得出， LCP  非常近似于 FMP 的时间点，同时 FMP 性能消耗较大，且会因为一些细小的变化导致数值巨大波动，所以<strong>推荐使用 LCP。</strong> 而 SI 因为计算复杂，指标难以解释，所以一般只在实验室环境下使用。</p>
+<h3 id="何时可以交互tti-tbt">何时可以交互：TTI &amp;&amp; TBT</h3>
+<ul>
+<li>TTI: Time to Interactive，页面从开始加载到主要子资源完成渲染，并能够快速、可靠地响应用户输入的时间点。</li>
+<li>TBT: Total Blocking Time，页面从 FCP 到 TTI 之间的阻塞时间，一般用来量化主线程在空闲之前的繁忙程度。</li>
+</ul>
+<p>TTI 虽然可以衡量页面可以交互的时间点，但是却无法感知这个期间浏览器的繁忙状态。而结合 TBT ，就能帮助理解在加载期间，页面无法响应用户输入的时间有多久。</p>
+<h3 id="交互时是否有延迟fid-mpfid">交互时是否有延迟：FID &amp;&amp; MPFID</h3>
+<ul>
+<li>FID：First Input Delay，用户第一次与页面交互（例如当他们单击链接、点按按钮等操作）直到浏览器对交互作出响应，并且实际能够开始处理事件程序所经过的时间。</li>
+<li>MPFID: Max Potential First Input Delay，记录在页面加载过程中用户和页面进行首次交互操作可能花费的最长时间。</li>
+</ul>
+<p><strong>MPFID</strong> <strong>是一个虚拟的可能的延迟时间，而<strong><strong>FID</strong></strong>是用户真实的首次交互的延迟时间</strong>。所以一般推荐使用FID，它是用户对页面交互性和响应性的第一印象。良好的第一印象有助于用户建立对整个应用的良好印象。同时在页面加载阶段，资源的处理任务最重，最容易产生输入延迟。</p>
+<p>至此，通过上面每个阶段的指标，基本可以实现全面衡量首屏性能。那么运行时的性能又可以怎样衡量呢？</p>
+<h2 id="运行时性能">运行时性能</h2>
+<p>运行时性能一般可以通过Long tasks 和 Input Delay来感知。Long tasks主要是衡量主线程的繁忙情况，而 Input Delay 主要是衡量用户交互的延迟情况。</p>
+<h3 id="long-tasks">Long tasks</h3>
+<p>如果一个任务在主线程上运行超过 50 毫秒，那么它就是 Long task。如果可以收集到运行时的所有Long tasks，就能知道运行时的性能情况。<strong>在具体实践中，可以关注耗时较长的Long task，将它和用户行为关联在一起，可以有效帮助定位线上卡顿的原因。</strong></p>
+<h3 id="input-delay">Input Delay</h3>
+<p>它源于 Event Timing[3] 标准，这个标准主要是帮助深入了解由用户交互触发的某些事件的延迟，通过计算用户输入和处理输入后的页面绘制时间的差值来感知延迟时间。<strong>这些延迟通常是由于开发人员代码编写不当，引起</strong> <strong>JS</strong> <strong>执行时间过长而产生的。</strong></p>
+<h2 id="性能指标的计算原理">性能指标的计算原理</h2>
+<p>页面性能相关的指标都有了，那么如何采集这些数据呢？</p>
+<h3 id="采集页面加载过程的各阶段耗时">采集页面加载过程的各阶段耗时</h3>
+<p>页面加载过程中的时间点主要依赖 Navigation Timing[4] 标准，这个标准后来升级到了2.0版本， 对应 Navigation Timing 2[5] 标准，两者虽然不尽相同，但是可计算出的指标基本一致。在浏览器中可以通过下面的方式获取：</p>
+<pre><code>// navigation timing
+const timing = window.performance.timing
+
+// navigation timing 2
+performance.getEntriesByType('navigation')
+</code></pre>
+<figure data-type="image" tabindex="2"><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/40d76dae4a1942ccb7f43900482496fe~tplv-k3u1fbpfcp-zoom-in-crop-mark:1512:0:0:0.awebp" alt="Image 2: 图片" loading="lazy"></figure>
+<p>基于这些数据，不仅可以计算出 DNS / TCP / Request 等耗时，还可以计算出 DOMReady / DOMParse / Load 等耗时。</p>
+<figure data-type="image" tabindex="3"><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/871fcf7287ef40aba9d09500bdc939b3~tplv-k3u1fbpfcp-zoom-in-crop-mark:1512:0:0:0.awebp" alt="Image 3: 图片" loading="lazy"></figure>
+<h3 id="采集-fp-fcp">采集 FP &amp;&amp; FCP</h3>
+<p>FP 和 FCP 可以通过浏览器提供的 API 直接获取，所以采集原理并不复杂。如果页面已经完成了首次绘制和首次内容绘制，可以使用下面的方式直接获取。</p>
+<pre><code>window.performance.getEntriesByType('paint')
+// or
+window.performance.getEntriesByName('first-paint')
+window.performance.getEntriesByName('first-contentful-paint')
+</code></pre>
+<p>但是如果页面还没有开始首次绘制，就需要通过监听获取。</p>
+<pre><code>const observer = new PerformanceObserver(function(list) {
+  const perfEntries = list.getEntries();
+  for (const perfEntry of perfEntries) {
+      // Process entries
+      // report back for analytics and monitoring
+      // ...
+  }
+});
+
+// register observer for paint timing notifications
+observer.observe({entryTypes: [&quot;paint&quot;]});
+</code></pre>
+<h3 id="采集-lcp">采集 LCP</h3>
+<p>LCP 主要依赖 PerformanceObserver，具体监听方式如下：</p>
+<pre><code>new PerformanceObserver((entryList) =&gt; {
+  for (const entry of entryList.getEntries()) {
+    console.log('LCP candidate:', entry.startTime, entry);
+  }
+}).observe({type: 'largest-contentful-paint', buffered: true});
+</code></pre>
+<p>浏览器会多次报告 LCP ，而一般真正的 LCP 是用户交互前最近一次报告的 LCP ，因为交互往往会改变用户可见的内容，所以用户交互后新报告的 LCP 不再符合 LCP 的指标定义。</p>
+<h3 id="采集-fmp">采集 FMP</h3>
+<p>与 FP / FCP / LCP 相比， <strong>FMP</strong> <strong>的采集相对比较复杂，它需要通过算法计算得出</strong>，而业界并没有统一的算法。不过比较认可的一个计算 FMP 的方式是「认定页面在加载和渲染过程中最大布局变动之后的那个绘制时间即为当前页面的 FMP 」。由于在页面渲染过程中，「 DOM 结构变化的时间点」和与之对应的「渲染的时间点」近似相同，所以字节内部计算 FMP 的方式是：计算出 DOM 结构变化最剧烈的时间点，即为 FMP。具体步骤为：</p>
+<ol>
+<li>通过 MutationObserver 监听每一次页面整体的 DOM 变化，触发 MutationObserver 的回调</li>
+<li>在回调计算出当前 DOM 树的分数</li>
+<li>在结算时，通过对比得出分数变化最剧烈的时刻，即为 FMP</li>
+</ol>
+<h3 id="采集-tti-tbt">采集 TTI &amp;&amp; TBT</h3>
+<p>与 FMP 相似，浏览器也没有提供直接获取 TTI 的 API ，不过针对如何计算 TTI 有详细的描述，实现对应描述就可以得出 TTI 的时间点。具体的描述是：先找到 FCP 的时间点，再往前找到一个安静窗口。安静窗口需要满足三个条件:  1) 没有  Long task。2)窗口中正在处理的 GET 请求不超过两个。3) 窗口时间窗读应该至少 5s。</p>
+<p>窗口前的最后一个长任务的结束时间就是 TTI 。</p>
+<figure data-type="image" tabindex="4"><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/97ba3ade35104f3ea22436fcbf0c1b98~tplv-k3u1fbpfcp-zoom-in-crop-mark:1512:0:0:0.awebp" alt="Image 4: 图片" loading="lazy"></figure>
+<p>而通过计算 FCP 和 TTI 之间的长任务的阻塞时间的总和，就能得出 TBT 。</p>
+<blockquote>
+<p>阻塞时间是 Long task 中超过 50ms 后的任务耗时。</p>
+</blockquote>
+<figure data-type="image" tabindex="5"><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/10c1ed9bf2b24ef9be1a21f76b40d0ff~tplv-k3u1fbpfcp-zoom-in-crop-mark:1512:0:0:0.awebp" alt="Image 5: 图片" loading="lazy"></figure>
+<h3 id="采集-fid-mpfid">采集 FID &amp;&amp; MPFID</h3>
+<p>FID 同样依赖 PerformanceObserver，具体监听方式如下：</p>
+<pre><code>new PerformanceObserver(function(list, obs) {
+  const firstInput = list.getEntries()[0];
+
+  // Measure the delay to begin processing the first input event.
+  const firstInputDelay = firstInput.processingStart - firstInput.startTime;
+  // Measure the duration of processing the first input event.
+  // Only use when the important event handling work is done synchronously in the handlers.
+  const firstInputDuration = firstInput.duration;
+  // Obtain some information about the target of this event, such as the id.
+  const targetId = firstInput.target ? firstInput.target.id : 'unknown-target';
+  // Process the first input delay and perhaps its duration...
+
+  // Disconnect this observer since callback is only triggered once.
+  obs.disconnect();
+}).observe({type: 'first-input', buffered: true});
+</code></pre>
+<p>MPFID 是 FCP 之后最长的长任务耗时，可以通过监听 FCP 之后的 Long tasks，对比拿到最长的长任务就是 MPFID 。</p>
+<blockquote>
+<p>虽然浏览器提供了足够的 API 来帮助采集各个性能指标，但是在 JS 中计算具体指标要更为复杂。原因有两点：一是 API 报告的内容和指标本身的定义有部分差异，所以计算时要处理这些差异；二是 部分场景下浏览器不会报告对应内容，这些场景下需要模拟测量。</p>
+</blockquote>
+<h2 id="怎样评估站点整体的性能好坏">怎样评估站点整体的性能好坏</h2>
+<p><strong>虽然有众多性能指标，但是每个性能指标评估的都是单一方面，如何整体来看站点的性能是好是坏呢？</strong> 对于每个单一指标，是否有标准去定义指标的值在具体哪个范围内能算优秀？线上的站点性能应该重点考量哪些性能指标？各个性能指标的权重占多少合适呢？</p>
+<h3 id="性能指标基准线">性能指标基准线</h3>
+<p>Google 提供了各个性能指标的基准线，有一定的参考意义。为什么只说是有一定参考意义？首先基准线本身是在变化的，随着指标计算的逐渐更新以及软件硬件的更新，基准线也会有一定的调整。其次用户的使用场景对性能指标也会有很大的影响，比如 iOS 用户上报的性能指标一般都优于 Android 用户上报的性能指标。</p>
+<p>下方是目前字节内部使用的部分性能指标基准线，基本对齐 Google 建议的基准线，通过这些数据可以分析站点的性能达标率情况。</p>
+<figure data-type="image" tabindex="6"><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/6c79f09bd6fd46f3a99a541249a0089a~tplv-k3u1fbpfcp-zoom-in-crop-mark:1512:0:0:0.awebp" alt="Image 6: 图片" loading="lazy"></figure>
+<h3 id="衡量站点满意度">衡量站点满意度</h3>
+<p>站点满意度的衡量除了要考虑常规的性能指标外，还要考虑体验类的指标，比如专门衡量视觉稳定性的指标 CLS。</p>
+<p>线上的站点满意度衡量，一般会在参考lighthouse的满意度计算规则的基础上，去除一些推荐在实验室环境测量的指标的权重。</p>
+<p>下方是目前字节使用的线上站点性能满意度的权重计算公式，去除了SI 和 TBT这两个不推荐在线上环境测量的指标。</p>
+<figure data-type="image" tabindex="7"><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/0c681c2bcbae4db090d8639f9c55ad05~tplv-k3u1fbpfcp-zoom-in-crop-mark:1512:0:0:0.awebp?" alt="Image 7: image.png" loading="lazy"></figure>
+<p>那么有了一个站点满意度以后，我们终于能知道一个站点的性能好坏了。那么假设性能不好，我们应该怎样优化？</p>
+<h2 id="如何优化站点性能">如何优化站点性能</h2>
+<p>通常，我们可以从性能指标下手去做针对性的优化。<strong>虽然指标各不相同，但是优化的思路是相通的。在了解清楚指标的依赖项以后，<strong><strong>通过</strong></strong>优化指标的相关依赖项，就能快速优化性能指标，从而提升站点性能。</strong> 说起来比较抽象，举个例子：比如当我们想要优化 TTI ，根据刚刚提到的 TTI 的计算方式，可以得出 TTI 的依赖项主要包含 FCP 、请求和 Long tasks，那么尽快的渲染、尽早的请求、请求尽快结束、避免长任务就是优化的关键。关于指标的具体优化措施的内容比较多，将在后续的文章中展开介绍。了解全面的优化措施固然重要，但把每个措施都做一遍并不一定能够高效地解决站点面临的关键性能问题。<strong>如何****立竿见影、具有针对性的去优化？</strong> <strong>通过还原用户加载时的情况来帮助<strong><strong>定位性能</strong></strong>问题是一个思路。</strong></p>
+<h2 id="利用线上监控定位性能问题">利用线上监控定位性能问题</h2>
+<p>一般情况下，前端监控除了监控性能指标以外，还会监控请求和资源的加载以及 Long tasks 等数据，这些数据可以帮助还原用户的加载现场，帮助找到蛛丝马迹。比如下面这个例子， 多项性能指标都很差。<strong>通过监控平台还原出的资源加载瀑布图，</strong> 可以看出绝大部分时间都耗在了拉取资源上 <strong>。</strong> 那么就可以初步得出性能优化方案，将优化措施侧重在资源优化上，比如缩小JS文件体积、延迟加载未使用的JS代码等等。</p>
+<figure data-type="image" tabindex="8"><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/d750b1b081034001ab52d2995b35854e~tplv-k3u1fbpfcp-zoom-in-crop-mark:1512:0:0:0.awebp" alt="Image 8: 图片" loading="lazy"></figure>
+<p>线上监控帮助定位性能问题的例子还有很多，这里不一一介绍了。截图中使用的是字节内部的前端监控平台，目前这套解决方案已同步在火山引擎上，接入即可对 Web 端真实数据进行实时监控、报警归因、聚类分析和细节定位，解决白屏、性能瓶颈、慢查询等关键问题，欢迎体验。</p>
+<p>扫描下方二维码，立即申请免费使用⬇️</p>
+<figure data-type="image" tabindex="9"><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/133e488b3a4944ae9f983cf539570baa~tplv-k3u1fbpfcp-zoom-in-crop-mark:1512:0:0:0.awebp" alt="Image 9: 图片" loading="lazy"></figure>
+<h3 id="相关资料">相关资料</h3>
+<p><em>[1] Web性能工作组：<a href="https://link.juejin.cn/?target=https%3A%2F%2Fwww.w3.org%2Fwebperf%2F" title="https://www.w3.org/webperf/">www.w3.org/webperf/</a></em></p>
+<p><em>[2] Paint Timing：<a href="https://link.juejin.cn/?target=https%3A%2F%2Fw3c.github.io%2Fpaint-timing%2F" title="https://w3c.github.io/paint-timing/">w3c.github.io/paint-timin…</a></em></p>
+<p><em>[3] Event Timing: <a href="https://link.juejin.cn/?target=https%3A%2F%2Fw3c.github.io%2Fevent-timing%2F" title="https://w3c.github.io/event-timing/">w3c.github.io/event-timin…</a></em></p>
+<p><em>[4] Navigation Timing: <a href="https://link.juejin.cn/?target=https%3A%2F%2Fwww.w3.org%2FTR%2Fnavigation-timing%2F" title="https://www.w3.org/TR/navigation-timing/">www.w3.org/TR/navigati…</a></em></p>
+<p><em>[5] Navigation Timing 2: <a href="https://link.juejin.cn/?target=https%3A%2F%2Fwww.w3.org%2FTR%2Fnavigation-timing-2%2F" title="https://www.w3.org/TR/navigation-timing-2/">www.w3.org/TR/navigati…</a></em></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://www.youmeng.me/post/qian-duan-jian-kong-xi-lie-2-or-liao-liao-js-cuo-wu-jian-kong-na-xie-shi-er/" class="post-title gt-a-link">
+                    前端监控系列2 ｜ 聊聊 JS 错误监控那些事儿
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first"> </div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        <a href='https://beian.miit.gov.cn' style="color: var(--gray) !important;">鲁ICP备2023002625号-1</a>
+    </div>
+    <div>
+        Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://www.youmeng.me/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // 使用 fetch 请求 API
+    fetch('https://api.btstu.cn/yan/api.php?charset=utf-8&encode=json')
+      .then(response => response.json()) // 解析 JSON 响应
+      .then(data => {
+        // 获取返回的 text
+        const text = data.text;
+        // 将 text 放入 div.slogan 中
+        const sloganDiv = document.querySelector('div.slogan');
+        if (sloganDiv) {
+          sloganDiv.textContent = text;
+        } else {
+          console.error("div.slogan 元素未找到");
+        }
+      })
+      .catch(error => {
+        console.error('请求失败', error);
+      });
+  });
+
+</script>
+
+    </div>
+</div>
+</body>
+</html>

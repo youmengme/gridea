@@ -1,0 +1,315 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>深入理解 `promiseWithResolvers` 与单例 API 包装处理重复请求 | Youmeng</title>
+
+<link rel="shortcut icon" href="https://www.youmeng.me/favicon.ico?v=1766572218032">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://www.youmeng.me/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<script>
+  document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+      // 检查当前是否为深色模式
+      function isDarkMode() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+
+      // 检查当前是否为浅色模式
+      function isLightMode() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      }
+
+      // 更新body的id根据当前颜色模式
+      function updateBodyId() {
+        const bodyElement = document.body;
+        if (isDarkMode()) {
+          bodyElement.id = 'dark';
+        } else if (isLightMode()) {
+          bodyElement.id = 'light';
+        } else {
+          bodyElement.removeAttribute('id');
+        }
+      }
+
+      // 初始检查和设置body的id
+      updateBodyId();
+
+      // 监听颜色模式的变化
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        updateBodyId();
+      });
+    });
+</script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div>
+            <a href="https://www.youmeng.me"  class="site-name gt-c-content-color-first">
+                Youmeng
+            </a>
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://www.youmeng.me/post/mei-zhou-ji-zhu-wen-zhang" class="menu gt-a-link">
+                            每周技术阅读
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1766572218032" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    深入理解 `promiseWithResolvers` 与单例 API 包装处理重复请求
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2024-06-19 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <p>在现代 Web 应用中，我们经常会遇到这样的场景：多个组件在页面加载时同时请求相同的数据。如果不加以控制，这些重复请求不仅会浪费网络资源，还会增加服务器负担，甚至可能导致数据不一致的问题。为了解决这一问题，我们可以使用一种称为“单例请求”的技术。本文将深入探讨如何使用 <code>promiseWithResolvers</code> 和单例 API 包装来高效处理重复请求。</p>
+<h3 id="什么是-promisewithresolvers">什么是 <code>promiseWithResolvers</code>？</h3>
+<p><code>promiseWithResolvers</code> 是一个实用的工具函数，它允许我们创建一个 Promise，并在外部控制其 <code>resolve</code> 和 <code>reject</code>。它的核心思想是将 Promise 的控制权交给调用者，以便在合适的时机手动触发 Promise 的状态变更。</p>
+<h3 id="promisewithresolvers-的实现"><code>promiseWithResolvers</code> 的实现</h3>
+<p>首先，让我们看看 <code>promiseWithResolvers</code> 的实现：</p>
+<pre><code class="language-ts">type PromiseState = 'pending' | 'resolved' | 'rejected';
+
+export function promiseWithResolvers&lt;T = unknown&gt;() {
+  let resolve: (value: T | PromiseLike&lt;T&gt;) =&gt; void;
+  let reject: (reason?: any) =&gt; void;
+  let finallyHandler: (() =&gt; void) | null = null;
+  let status: PromiseState = 'pending';
+
+  const promise = new Promise&lt;T&gt;((res, rej) =&gt; {
+    resolve = (value) =&gt; {
+      status = 'resolved';
+      res(value);
+      if (finallyHandler) {
+        finallyHandler();
+      }
+    };
+    reject = (reason) =&gt; {
+      status = 'rejected';
+      rej(reason);
+      if (finallyHandler) {
+        finallyHandler();
+      }
+    };
+  }).finally(() =&gt; {
+    if (finallyHandler) {
+      finallyHandler();
+    }
+  });
+
+  return {
+    promise,
+    resolve,
+    reject,
+    finally: (handler: () =&gt; void) =&gt; {
+      finallyHandler = handler;
+    },
+    getStatus: () =&gt; status
+  };
+}
+</code></pre>
+<h3 id="代码解析">代码解析</h3>
+<ul>
+<li><strong>状态管理</strong>：通过 <code>status</code> 属性，我们可以跟踪 Promise 的当前状态（<code>pending</code>、<code>resolved</code> 或 <code>rejected</code>）。</li>
+<li><strong>控制权外露</strong>：<code>resolve</code> 和 <code>reject</code> 方法被外露，使得调用者可以在适当的时机手动触发 Promise 的状态变更。</li>
+<li><strong>清理机制</strong>：通过 <code>finally</code> 方法，我们可以在 Promise 结束时执行清理操作，确保资源得以释放。</li>
+</ul>
+<h3 id="实战单例-api-包装">实战：单例 API 包装</h3>
+<p>为了更好地理解 <code>promiseWithResolvers</code> 的应用场景，让我们来看一个实际例子：如何使用它来实现单例 API 包装，从而避免重复请求。</p>
+<p>假设我们有一个获取用户信息的 API <code>getUser</code>，我们希望在任何时候发起的所有 <code>getUser</code> 请求都只会产生一个实际的网络请求，并且所有调用者都能共享同一个结果。</p>
+<pre><code class="language-ts">import { Http } from 'path-to-http'; // 假设 Http 是你的 HTTP 库
+
+let singletonPromise: ReturnType&lt;typeof promiseWithResolvers&gt; | null = null;
+
+export function getUser() {
+  if (!singletonPromise) {
+    singletonPromise = promiseWithResolvers();
+    singletonPromise.finally(() =&gt; {
+      singletonPromise = null; // 请求完成后清理实例
+    });
+
+    Http.get(
+      '/auth/user',
+      {},
+    )
+      .then((res) =&gt; {
+        if (res?.data?.userKey) {
+          singletonPromise.resolve(res);
+        }
+      })
+      .catch((error) =&gt; {
+        singletonPromise.reject(error);
+      });
+  }
+
+  return singletonPromise.promise;
+}
+</code></pre>
+<h3 id="代码解析-2">代码解析</h3>
+<ul>
+<li><strong>单例模式</strong>：通过 <code>singletonPromise</code> 变量，我们确保在请求完成之前，所有调用都指向同一个 Promise 实例。</li>
+<li><strong>请求逻辑</strong>：调用 <code>Http.get</code> 进行实际的网络请求，并在成功时解析响应数据，更新日志，最后调用 <code>resolve</code> 方法。</li>
+<li><strong>错误处理</strong>：在请求失败时，调用 <code>reject</code> 方法。</li>
+<li><strong>清理机制</strong>：通过 <code>finally</code> 方法，我们在请求完成后清理 <code>singletonPromise</code>，以便下次请求可以创建新的 Promise。</li>
+</ul>
+<h3 id="结语">结语</h3>
+<p>通过 <code>promiseWithResolvers</code> 和单例 API 包装，我们可以高效地处理重复请求，确保在任何时候发起的所有相同请求都只会产生一个实际的网络请求，并且所有调用者都能共享同一个结果。这不仅优化了网络资源的使用，还提高了应用的性能和稳定性。</p>
+<p>希望本文能为你提供启发，帮助你在实际项目中更好地处理类似问题。如果你有任何疑问或建议，欢迎在评论区讨论。Happy coding!</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://www.youmeng.me/post/xiao-cheng-xu-zhong-huo-qu-scrollview-nei-rong-de-zhen-shi-kuan-du/" class="post-title gt-a-link">
+                    小程序中获取scrollView内容的真实宽度
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first"> </div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        <a href='https://beian.miit.gov.cn' style="color: var(--gray) !important;">鲁ICP备2023002625号-1</a>
+    </div>
+    <div>
+        Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://www.youmeng.me/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // 使用 fetch 请求 API
+    fetch('https://api.btstu.cn/yan/api.php?charset=utf-8&encode=json')
+      .then(response => response.json()) // 解析 JSON 响应
+      .then(data => {
+        // 获取返回的 text
+        const text = data.text;
+        // 将 text 放入 div.slogan 中
+        const sloganDiv = document.querySelector('div.slogan');
+        if (sloganDiv) {
+          sloganDiv.textContent = text;
+        } else {
+          console.error("div.slogan 元素未找到");
+        }
+      })
+      .catch(error => {
+        console.error('请求失败', error);
+      });
+  });
+
+</script>
+
+    </div>
+</div>
+</body>
+</html>

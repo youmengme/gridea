@@ -1,0 +1,306 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>在同一个 Git 仓库中并行开发多个需求：解锁 `git worktree` 的魔法 | Youmeng</title>
+
+<link rel="shortcut icon" href="https://www.youmeng.me/favicon.ico?v=1766572218032">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://www.youmeng.me/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<script>
+  document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+      // 检查当前是否为深色模式
+      function isDarkMode() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+
+      // 检查当前是否为浅色模式
+      function isLightMode() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      }
+
+      // 更新body的id根据当前颜色模式
+      function updateBodyId() {
+        const bodyElement = document.body;
+        if (isDarkMode()) {
+          bodyElement.id = 'dark';
+        } else if (isLightMode()) {
+          bodyElement.id = 'light';
+        } else {
+          bodyElement.removeAttribute('id');
+        }
+      }
+
+      // 初始检查和设置body的id
+      updateBodyId();
+
+      // 监听颜色模式的变化
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        updateBodyId();
+      });
+    });
+</script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div>
+            <a href="https://www.youmeng.me"  class="site-name gt-c-content-color-first">
+                Youmeng
+            </a>
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://www.youmeng.me/post/mei-zhou-ji-zhu-wen-zhang" class="menu gt-a-link">
+                            每周技术阅读
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1766572218032" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    在同一个 Git 仓库中并行开发多个需求：解锁 `git worktree` 的魔法
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2024-06-12 ·
+                    </time>
+                    
+                        <a href="https://www.youmeng.me/tag/EK1oePRS5/" class="post-tags">
+                            # Git
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <p>在开发过程中，我们常常会遇到同时处理多个需求的情况。频繁切换分支不仅让人头疼，还容易出错。今天，我要给大家介绍一个神器——<code>git worktree</code>。它能让你在同一个 Git 仓库中创建多个工作目录，每个目录独立处理一个分支，从此告别频繁切换分支的烦恼！</p>
+<h4 id="为什么要用-git-worktree">为什么要用 <code>git worktree</code>？</h4>
+<p>想象一下，你正在开发一个超级酷的新功能，突然老板走过来，拍了拍你的肩膀：“小张，那个紧急 bug 你赶紧修一下。”你只好先把手头的工作放一边，切换到另一个分支去修 bug。修完了再切回来，结果发现刚才的工作还没保存，气得你想砸键盘。</p>
+<p>有了 <code>git worktree</code>，你可以在不同的目录中同时处理多个分支，再也不用担心中断工作了！</p>
+<h4 id="git-worktree-的基本用法"><code>git worktree</code> 的基本用法</h4>
+<h5 id="1-创建新的工作目录">1. 创建新的工作目录</h5>
+<pre><code class="language-sh"># 在当前仓库中创建一个新的工作目录，并切换到 branch-name 分支
+git worktree add ../path/to/new-worktree branch-name
+</code></pre>
+<h5 id="2-列出所有工作目录">2. 列出所有工作目录</h5>
+<pre><code class="language-sh">git worktree list
+</code></pre>
+<h5 id="3-移除工作目录">3. 移除工作目录</h5>
+<pre><code class="language-sh"># 移除指定的工作目录
+git worktree remove ../path/to/new-worktree
+</code></pre>
+<h4 id="示例工作流">示例工作流</h4>
+<p>假设你有两个需求需要同时开发，一个叫 <code>requirement1</code>，另一个叫 <code>requirement2</code>。我们来看看如何用 <code>git worktree</code> 优雅地处理它们。</p>
+<h5 id="1-初始化仓库和创建主工作目录">1. 初始化仓库和创建主工作目录</h5>
+<p>首先，确保你已经克隆了你的仓库并在主工作目录中：</p>
+<pre><code class="language-sh">git clone https://github.com/your-repo.git
+cd your-repo
+</code></pre>
+<h5 id="2-创建新的工作目录并切换到特性分支">2. 创建新的工作目录并切换到特性分支</h5>
+<pre><code class="language-sh"># 为第一个需求创建一个新的工作目录
+git worktree add ../requirement1 feature/requirement1
+
+# 为第二个需求创建一个新的工作目录
+git worktree add ../requirement2 feature/requirement2
+</code></pre>
+<p>现在，你有三个独立的工作目录：</p>
+<ul>
+<li><code>your-repo</code>：主工作目录，仍然在 <code>develop</code> 分支上。</li>
+<li><code>requirement1</code>：新工作目录，在 <code>feature/requirement1</code> 分支上。</li>
+<li><code>requirement2</code>：新工作目录，在 <code>feature/requirement2</code> 分支上。</li>
+</ul>
+<h5 id="3-在不同的工作目录中进行开发">3. 在不同的工作目录中进行开发</h5>
+<pre><code class="language-sh"># 在 requirement1 工作目录中开发需求1
+cd ../requirement1
+# 进行开发和提交
+git add .
+git commit -m &quot;Implement requirement 1&quot;
+
+# 在 requirement2 工作目录中开发需求2
+cd ../requirement2
+# 进行开发和提交
+git add .
+git commit -m &quot;Implement requirement 2&quot;
+</code></pre>
+<h5 id="4-合并分支回主分支">4. 合并分支回主分支</h5>
+<p>当你完成各自的需求开发后，可以将这些分支合并回 <code>develop</code> 分支：</p>
+<pre><code class="language-sh"># 切换回主工作目录
+cd ../your-repo
+
+# 合并 feature/requirement1 分支
+git checkout develop
+git merge feature/requirement1
+
+# 合并 feature/requirement2 分支
+git merge feature/requirement2
+</code></pre>
+<h5 id="5-清理工作目录">5. 清理工作目录</h5>
+<p>如果不再需要这些工作目录，可以将其移除：</p>
+<pre><code class="language-sh">git worktree remove ../requirement1
+git worktree remove ../requirement2
+</code></pre>
+<h4 id="git-worktree-的优势"><code>git worktree</code> 的优势</h4>
+<ul>
+<li><strong>并行开发</strong>：允许你在同一个仓库中同时处理多个分支，而无需频繁切换分支。</li>
+<li><strong>独立环境</strong>：每个工作目录都是独立的，可以避免分支之间的相互影响。</li>
+<li><strong>简化工作流</strong>：可以更直观地管理和查看不同分支的开发进度。</li>
+</ul>
+<p>通过使用 <code>git worktree</code>，你可以更高效地管理多个需求的开发，减少频繁切换分支带来的麻烦，从而提高开发效率。再也不用担心老板突然的需求打断你的工作了！</p>
+<blockquote>
+<p>配合pnpm使用安装依赖快人一步哦~</p>
+</blockquote>
+<h3 id="结语">结语</h3>
+<p><code>git worktree</code> 就像是 Git 的魔法棒，轻轻一挥，就能让你在同一个仓库中自由穿梭于不同的需求之间。希望这篇文章能帮助你更好地理解和使用 <code>git worktree</code>，让你的开发工作更加顺畅和高效。快去试试吧，你会爱上它的！</p>
+<p>Happy coding! 🚀</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://www.youmeng.me/post/ru-he-zai-git-he-bing-chong-tu-hou-zheng-que-ti-jiao-wen-jian-bing-tong-guo-husky-xiao-yan/" class="post-title gt-a-link">
+                    如何在 Git 合并冲突后正确提交文件并通过 Husky 校验
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first"> </div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        <a href='https://beian.miit.gov.cn' style="color: var(--gray) !important;">鲁ICP备2023002625号-1</a>
+    </div>
+    <div>
+        Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://www.youmeng.me/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // 使用 fetch 请求 API
+    fetch('https://api.btstu.cn/yan/api.php?charset=utf-8&encode=json')
+      .then(response => response.json()) // 解析 JSON 响应
+      .then(data => {
+        // 获取返回的 text
+        const text = data.text;
+        // 将 text 放入 div.slogan 中
+        const sloganDiv = document.querySelector('div.slogan');
+        if (sloganDiv) {
+          sloganDiv.textContent = text;
+        } else {
+          console.error("div.slogan 元素未找到");
+        }
+      })
+      .catch(error => {
+        console.error('请求失败', error);
+      });
+  });
+
+</script>
+
+    </div>
+</div>
+</body>
+</html>

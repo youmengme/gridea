@@ -1,0 +1,353 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>在 Taro 中实现懒加载组件，可用于瀑布流布局和组件懒加载 | Youmeng</title>
+
+<link rel="shortcut icon" href="https://www.youmeng.me/favicon.ico?v=1766572218032">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://www.youmeng.me/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<script>
+  document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+      // 检查当前是否为深色模式
+      function isDarkMode() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+
+      // 检查当前是否为浅色模式
+      function isLightMode() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      }
+
+      // 更新body的id根据当前颜色模式
+      function updateBodyId() {
+        const bodyElement = document.body;
+        if (isDarkMode()) {
+          bodyElement.id = 'dark';
+        } else if (isLightMode()) {
+          bodyElement.id = 'light';
+        } else {
+          bodyElement.removeAttribute('id');
+        }
+      }
+
+      // 初始检查和设置body的id
+      updateBodyId();
+
+      // 监听颜色模式的变化
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        updateBodyId();
+      });
+    });
+</script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div>
+            <a href="https://www.youmeng.me"  class="site-name gt-c-content-color-first">
+                Youmeng
+            </a>
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://www.youmeng.me/post/mei-zhou-ji-zhu-wen-zhang" class="menu gt-a-link">
+                            每周技术阅读
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1766572218032" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    在 Taro 中实现懒加载组件，可用于瀑布流布局和组件懒加载
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2024-05-29 ·
+                    </time>
+                    
+                        <a href="https://www.youmeng.me/tag/RlJyuYWDe/" class="post-tags">
+                            # Taro
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h3 id="在-taro-中实现懒加载组件保留元素高度的解决方案">在 Taro 中实现懒加载组件：保留元素高度的解决方案</h3>
+<p>在开发小程序时，我们常常需要处理长列表的渲染问题。为了优化性能，组件懒加载是一种非常有效的手段。然而，在实现懒加载时，我们需要确保不可见的元素仍然保留它们的高度，以避免位置变化。这篇文章将记录我在 Taro 中实现懒加载组件的过程，并分享我的解决方案。</p>
+<h4 id="问题描述">问题描述</h4>
+<p>在我的小程序项目中，我需要渲染一个包含大量项目的长列表。为了提高性能，我决定使用懒加载技术，只在需要时加载和渲染可见的项目。然而，我遇到了一个问题：当项目不可见时，它们的高度会消失，导致整个列表的位置发生变化。这种情况会影响用户体验，特别是在快速滚动时。</p>
+<h4 id="解决方案">解决方案</h4>
+<p>为了解决这个问题，我决定创建一个懒加载组件，该组件在不可见时保留元素的高度。具体步骤如下：</p>
+<ol>
+<li><strong>监听元素是否进入视口</strong>：使用 <code>Taro.createIntersectionObserver</code> 创建一个观察器。</li>
+<li><strong>动态获取元素高度</strong>：使用 <code>Taro.createSelectorQuery</code> 获取元素的高度。</li>
+<li><strong>保留高度</strong>：当元素不可见时，通过 <code>paddingTop</code> 保留高度，避免位置变化。</li>
+</ol>
+<h4 id="代码实现">代码实现</h4>
+<h5 id="1-创建-lazyloadcomponent-组件">1. 创建 <code>LazyLoadComponent</code> 组件</h5>
+<p>首先，我们创建一个 <code>LazyLoadComponent</code> 组件，用于包裹需要懒加载的内容。</p>
+<pre><code class="language-tsx">import React, { useEffect, useRef, useState } from 'react';
+import Taro from '@tarojs/taro';
+import { View } from '@tarojs/components';
+
+interface LazyLoadComponentProps {
+  children: React.ReactNode;
+  threshold: number; // 触发加载的阈值，需要大于100
+}
+
+function LazyLoadComponent(props: LazyLoadComponentProps) {
+  const { children, threshold } = props;
+  const [isVisible, setIsVisible] = useState(true);
+  const [elementHeight, setElementHeight] = useState(0);
+  const containerRef = useRef&lt;HTMLDivElement&gt;(null);
+  const lazyloadContainerId = useRef(`lazyload-${Math.random().toString(36).slice(2)}`);
+
+  useEffect(() =&gt; {
+    if (!containerRef.current) return () =&gt; {};
+
+    getElementBoundingClientRect(`#${lazyloadContainerId.current}`).then((res) =&gt; {
+      setElementHeight(res?.height!);
+    });
+
+    // 创建 IntersectionObserver
+    const observer = Taro.createIntersectionObserver(this, {
+      thresholds: [0.1],
+      observeAll: false,
+    });
+
+    observer.relativeToViewport({ top: threshold }).observe(`#${lazyloadContainerId.current}`, (res) =&gt; {
+      if (res.intersectionRatio &gt; 0.1) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    });
+
+    return () =&gt; {
+      observer.disconnect();
+    };
+  }, [threshold]);
+
+  return (
+    &lt;View
+      id={lazyloadContainerId.current}
+      ref={containerRef}
+      style={{
+        width: isVisible ? 'auto' : '1px',
+        height: isVisible ? 'auto' : `${elementHeight}px`,
+      }}
+    &gt;
+      {isVisible ? children : null}
+    &lt;/View&gt;
+  );
+}
+
+export default LazyLoadComponent;
+</code></pre>
+<h5 id="2-获取元素高度">2. 获取元素高度</h5>
+<p>为了获取每个元素的高度，我们定义了一个辅助函数 <code>getElementBoundingClientRect</code>。这个函数使用了 <code>Taro.createSelectorQuery</code> 来查询元素的边界矩形，并返回一个 <code>Promise</code>。</p>
+<pre><code class="language-tsx">function getElementBoundingClientRect(selector: string) {
+  return new Promise&lt;BoundingClientRect | undefined&gt;((resolve, reject) =&gt; {
+    function getBounding() {
+      const $ = Taro.createSelectorQuery();
+      $.select(selector)
+        .boundingClientRect()
+        .exec((res) =&gt; {
+          if (res &amp;&amp; res[0]) {
+            resolve(res[0]);
+          } else {
+            resolve(undefined);
+          }
+        });
+    }
+
+    try {
+      const timer = setTimeout(() =&gt; {
+        getBounding();
+      }, 16);
+      Taro.nextTick(() =&gt; {
+        clearTimeout(timer);
+        getBounding();
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+</code></pre>
+<h5 id="3-使用示例">3. 使用示例</h5>
+<p>我们在一个长列表中使用 <code>LazyLoadComponent</code> 来包裹需要懒加载的内容。</p>
+<pre><code class="language-tsx">import React from 'react';
+import LazyLoadComponent from './LazyLoadComponent';
+
+const LongList = () =&gt; {
+  const items = Array.from({ length: 10000 }, (_, index) =&gt; index + 1);
+
+  return (
+    &lt;View&gt;
+      {items.map(item =&gt; (
+        &lt;LazyLoadComponent key={item} threshold={300}&gt;
+          &lt;View style={{ height: '100px', border: '1px solid black', margin: '10px 0' }}&gt;
+            Item {item}
+          &lt;/View&gt;
+        &lt;/LazyLoadComponent&gt;
+      ))}
+    &lt;/View&gt;
+  );
+};
+
+export default LongList;
+</code></pre>
+<h4 id="代码解释">代码解释</h4>
+<ol>
+<li><strong>获取元素高度</strong>：使用 <code>Taro.createSelectorQuery</code> 获取元素的高度，并更新 <code>elementHeight</code> 状态。</li>
+<li><strong>IntersectionObserver</strong>：使用 <code>Taro.createIntersectionObserver</code> 创建一个观察器，监听元素是否进入视口。</li>
+<li><strong>保留高度</strong>：当元素不可见时，通过 <code>paddingTop</code> 保留高度，避免位置变化。</li>
+</ol>
+<p>通过上述步骤，我们成功实现了在 Taro 中的懒加载组件，并解决了不可见元素高度消失的问题。希望这篇文章对你有所帮助！</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first"> </div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        <a href='https://beian.miit.gov.cn' style="color: var(--gray) !important;">鲁ICP备2023002625号-1</a>
+    </div>
+    <div>
+        Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://www.youmeng.me/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // 使用 fetch 请求 API
+    fetch('https://api.btstu.cn/yan/api.php?charset=utf-8&encode=json')
+      .then(response => response.json()) // 解析 JSON 响应
+      .then(data => {
+        // 获取返回的 text
+        const text = data.text;
+        // 将 text 放入 div.slogan 中
+        const sloganDiv = document.querySelector('div.slogan');
+        if (sloganDiv) {
+          sloganDiv.textContent = text;
+        } else {
+          console.error("div.slogan 元素未找到");
+        }
+      })
+      .catch(error => {
+        console.error('请求失败', error);
+      });
+  });
+
+</script>
+
+    </div>
+</div>
+</body>
+</html>

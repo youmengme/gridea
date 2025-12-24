@@ -1,0 +1,294 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>Taro3 里可以跑起来的第三方优秀类库 | Youmeng</title>
+
+<link rel="shortcut icon" href="https://www.youmeng.me/favicon.ico?v=1766572218032">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://www.youmeng.me/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<script>
+  document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+      // 检查当前是否为深色模式
+      function isDarkMode() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+
+      // 检查当前是否为浅色模式
+      function isLightMode() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      }
+
+      // 更新body的id根据当前颜色模式
+      function updateBodyId() {
+        const bodyElement = document.body;
+        if (isDarkMode()) {
+          bodyElement.id = 'dark';
+        } else if (isLightMode()) {
+          bodyElement.id = 'light';
+        } else {
+          bodyElement.removeAttribute('id');
+        }
+      }
+
+      // 初始检查和设置body的id
+      updateBodyId();
+
+      // 监听颜色模式的变化
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        updateBodyId();
+      });
+    });
+</script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div>
+            <a href="https://www.youmeng.me"  class="site-name gt-c-content-color-first">
+                Youmeng
+            </a>
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://www.youmeng.me/post/mei-zhou-ji-zhu-wen-zhang" class="menu gt-a-link">
+                            每周技术阅读
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1766572218032" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    Taro3 里可以跑起来的第三方优秀类库
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2024-05-29 ·
+                    </time>
+                    
+                        <a href="https://www.youmeng.me/tag/RlJyuYWDe/" class="post-tags">
+                            # Taro
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <p>待续不断搜索可以运行在 Taro3 环境下的<a href="https://github.com/search?o=desc&amp;q=react&amp;s=stars&amp;type=Repositories">优秀第三方类库</a>.</p>
+<h2 id="特性">特性</h2>
+<ul>
+<li>
+<p>🎁 使用原始 npm 包, 保持原汁原味, 不做侵入性的修改.</p>
+</li>
+<li>
+<p>🔧 简化配置, 搭配 <a href="https://github.com/tarojsx/polyfill"><code>@tarojsx/polyfill</code></a> 使用.</p>
+</li>
+<li>
+<p>🔎 完善的 Typescript 类型提示.</p>
+</li>
+<li>
+<p>🔭 持续探索中...</p>
+</li>
+</ul>
+<h2 id="需求">需求</h2>
+<ul>
+<li><strong>taro 3+</strong></li>
+</ul>
+<h2 id="安装">安装</h2>
+<p><code>npm i @tarojsx/library @tarojsx/polyfill</code></p>
+<h2 id="使用">使用</h2>
+<p>部分组件需要用到 polyfill.</p>
+<p>更新 config/index.js 配置如下</p>
+<pre><code class="language-ts">const { TaroProvidePlugin } = require('@tarojsx/polyfill/dist/plugins')
+    const config = {
+        mini: {
+        webpackChain(chain, webpack) {
+            chain
+            .plugin('taroProviderPlugin')
+            .use(TaroProvidePlugin)
+        }
+    }
+}
+</code></pre>
+<h2 id="模块">模块</h2>
+<h3 id="图表">图表</h3>
+<ul>
+<li><a href="https://tarojsx.github.io/docs/library/docs/antv-f2">AntV F2</a> - 让数据栩栩如生</li>
+</ul>
+<h3 id="虚拟滚动">虚拟滚动</h3>
+<ul>
+<li><a href="https://tarojsx.github.io/docs/library/docs/react-window">react-window</a> - 虚拟滚动
+<ul>
+<li><code>FixedSizeList</code></li>
+<li><code>VariableSizeList</code></li>
+</ul>
+</li>
+<li><a href="https://tarojsx.github.io/docs/library/docs/react-vtree">react-vtree</a> - 虚拟滚动树
+<ul>
+<li><code>FixedSizeTree</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="交互动画">交互动画</h3>
+<ul>
+<li><a href="https://tarojsx.github.io/docs/library/docs/react-spring">react-spring</a> - 弹性物理动画</li>
+<li><a href="https://tarojsx.github.io/docs/library/docs/react-use-gesture">react-use-gesture</a> - 触摸手势</li>
+</ul>
+<h3 id="测试步骤">测试步骤</h3>
+<ol>
+<li>打开微信开发者工具 CLI/HTTP 调用功能，设置 - 安全设置 - 服务端口</li>
+<li>导入项目，目录指向当前项目文件夹。</li>
+<li>运行 <code>npm run test</code></li>
+<li>如果提示 <code>Failed to launch wechat web devTools</code>，请先退出微信开发者工具。</li>
+</ol>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://www.youmeng.me/post/zai-taro-zhong-shi-xian-lan-jia-zai-zu-jian-ke-yong-yu-pu-bu-liu-bu-ju-he-zu-jian-lan-jia-zai/" class="post-title gt-a-link">
+                    在 Taro 中实现懒加载组件，可用于瀑布流布局和组件懒加载
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first"> </div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        <a href='https://beian.miit.gov.cn' style="color: var(--gray) !important;">鲁ICP备2023002625号-1</a>
+    </div>
+    <div>
+        Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://www.youmeng.me/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // 使用 fetch 请求 API
+    fetch('https://api.btstu.cn/yan/api.php?charset=utf-8&encode=json')
+      .then(response => response.json()) // 解析 JSON 响应
+      .then(data => {
+        // 获取返回的 text
+        const text = data.text;
+        // 将 text 放入 div.slogan 中
+        const sloganDiv = document.querySelector('div.slogan');
+        if (sloganDiv) {
+          sloganDiv.textContent = text;
+        } else {
+          console.error("div.slogan 元素未找到");
+        }
+      })
+      .catch(error => {
+        console.error('请求失败', error);
+      });
+  });
+
+</script>
+
+    </div>
+</div>
+</body>
+</html>

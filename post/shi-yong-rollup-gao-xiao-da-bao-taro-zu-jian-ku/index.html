@@ -1,0 +1,290 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>使用Rollup高效打包Taro组件库 | Youmeng</title>
+
+<link rel="shortcut icon" href="https://www.youmeng.me/favicon.ico?v=1766572218032">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://www.youmeng.me/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<script>
+  document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+      // 检查当前是否为深色模式
+      function isDarkMode() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+
+      // 检查当前是否为浅色模式
+      function isLightMode() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      }
+
+      // 更新body的id根据当前颜色模式
+      function updateBodyId() {
+        const bodyElement = document.body;
+        if (isDarkMode()) {
+          bodyElement.id = 'dark';
+        } else if (isLightMode()) {
+          bodyElement.id = 'light';
+        } else {
+          bodyElement.removeAttribute('id');
+        }
+      }
+
+      // 初始检查和设置body的id
+      updateBodyId();
+
+      // 监听颜色模式的变化
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        updateBodyId();
+      });
+    });
+</script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div>
+            <a href="https://www.youmeng.me"  class="site-name gt-c-content-color-first">
+                Youmeng
+            </a>
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://www.youmeng.me/post/mei-zhou-ji-zhu-wen-zhang" class="menu gt-a-link">
+                            每周技术阅读
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1766572218032" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    使用Rollup高效打包Taro组件库
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2024-07-12 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="引言">引言</h2>
+<p>在前端工程化开发中，组件库的打包是一个关键步骤。本文将详细介绍如何使用Rollup工具来打包Taro组件库，以及如何通过配置和插件选择来优化打包过程。</p>
+<h2 id="rollup的优势">Rollup的优势</h2>
+<p>Rollup以其小巧的打包体积、代码精简和高效的Tree-shaking特性脱颖而出。尽管Rollup在社区支持和插件生态上不如Webpack丰富，但其对ES2015模块的支持和Tree-shaking特性使其成为打包Taro组件库的理想选择。</p>
+<h2 id="项目结构与配置">项目结构与配置</h2>
+<p>项目结构遵循Taro的标准初始化模式，组件存放于<code>src/components</code>目录，并通过<code>src/components/index.ts</code>统一暴露。在<code>package.json</code>中添加<code>&quot;type&quot;: &quot;module&quot;</code>配置，确保Rollup正确处理ES6模块。</p>
+<h2 id="rollup插件详解">Rollup插件详解</h2>
+<p>为了支持Taro组件库的打包，我们选用了以下Rollup插件：</p>
+<ul>
+<li><strong>@rollup/plugin-json</strong>：处理JSON文件。</li>
+<li><strong>@rollup/plugin-node-resolve</strong>：解析模块路径。</li>
+<li><strong>@rollup/plugin-commonjs</strong>：转换CommonJS模块。</li>
+<li><strong>rollup-plugin-typescript2</strong>：支持TypeScript。</li>
+<li><strong>rollup-plugin-babel</strong>：配置Babel以支持Taro。</li>
+<li><strong>rollup-plugin-postcss</strong>：处理CSS/SASS，并实现移动端像素转换。</li>
+</ul>
+<h2 id="完整rollup配置示例">完整Rollup配置示例</h2>
+<p>以下是Rollup的配置示例，展示了如何设置输入输出、外部依赖、插件等：</p>
+<pre><code class="language-javascript">import json from '@rollup/plugin-json';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import typescript from 'rollup-plugin-typescript2';
+import babel from 'rollup-plugin-babel';
+import postcss from 'rollup-plugin-postcss';
+import clear from 'rollup-plugin-clear';
+import terser from 'rollup-plugin-terser';
+// ...其他插件导入
+
+const external = ['react', 'react-dom', '@tarojs/components'];
+const plugins = [
+  clear({ targets: 'dist', watch: true }),
+  postcss({
+    plugins: [autoprefixer(), cssnano(), pxtransform({ platform: 'h5' }), postUrl({ url: 'inline' }), postImport()]
+  }),
+  resolve({ moduleDirectory: 'node_modules' }),
+  commonjs(),
+  json(),
+  babel({
+    runtimeHelpers: true,
+    presets: [['taro', { framework: 'react' }]],
+    plugins: ['@babel/plugin-transform-runtime']
+  }),
+  typescript({ tsconfig: './tsconfig.json' }),
+  // ...其他插件配置
+  terser() // 代码压缩
+];
+
+export default {
+  input: './src/index.ts',
+  output: {
+    format: 'esm',
+    dir: './dist/lancooUI-Mobile',
+    sourcemap: true,
+    exports: 'named',
+    preserveModules: true,
+    preserveModulesRoot: 'src'
+  },
+  external,
+  plugins
+};
+</code></pre>
+<h2 id="打包过程中的难点与解决方案">打包过程中的难点与解决方案</h2>
+<p>在打包过程中，我们遇到了JSX支持、类型声明、SASS支持和像素转换等难点。通过合理配置Babel和PostCSS插件，以及对Rollup打包流程的深入理解，我们成功解决了这些问题。</p>
+<h2 id="踩坑经验分享">踩坑经验分享</h2>
+<p>在实际打包过程中，我们遇到了一些具体问题，例如字体未打包、样式失效等。通过引入<code>postcss-url</code>和<code>postcss-import</code>插件，我们解决了这些问题。</p>
+<h2 id="总结">总结</h2>
+<p>通过本文的介绍，我们了解到Rollup是一个高效且灵活的打包工具，尤其适合打包Taro组件库。虽然在配置和插件选择上可能需要一些探索，但一旦掌握，Rollup将大大提高打包效率和最终产物的质量。</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://www.youmeng.me/post/shi-yong-pnpm-link-jin-xing-ben-di-bao-de-lian-jie-yu-ce-shi/" class="post-title gt-a-link">
+                    使用 `pnpm link` 进行本地包的链接与测试
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first"> </div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        <a href='https://beian.miit.gov.cn' style="color: var(--gray) !important;">鲁ICP备2023002625号-1</a>
+    </div>
+    <div>
+        Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://www.youmeng.me/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // 使用 fetch 请求 API
+    fetch('https://api.btstu.cn/yan/api.php?charset=utf-8&encode=json')
+      .then(response => response.json()) // 解析 JSON 响应
+      .then(data => {
+        // 获取返回的 text
+        const text = data.text;
+        // 将 text 放入 div.slogan 中
+        const sloganDiv = document.querySelector('div.slogan');
+        if (sloganDiv) {
+          sloganDiv.textContent = text;
+        } else {
+          console.error("div.slogan 元素未找到");
+        }
+      })
+      .catch(error => {
+        console.error('请求失败', error);
+      });
+  });
+
+</script>
+
+    </div>
+</div>
+</body>
+</html>

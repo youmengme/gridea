@@ -1,0 +1,294 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>如何写好提示词（Prompt）？ | Youmeng</title>
+
+<link rel="shortcut icon" href="https://www.youmeng.me/favicon.ico?v=1766572218032">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://www.youmeng.me/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<script>
+  document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+      // 检查当前是否为深色模式
+      function isDarkMode() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+
+      // 检查当前是否为浅色模式
+      function isLightMode() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      }
+
+      // 更新body的id根据当前颜色模式
+      function updateBodyId() {
+        const bodyElement = document.body;
+        if (isDarkMode()) {
+          bodyElement.id = 'dark';
+        } else if (isLightMode()) {
+          bodyElement.id = 'light';
+        } else {
+          bodyElement.removeAttribute('id');
+        }
+      }
+
+      // 初始检查和设置body的id
+      updateBodyId();
+
+      // 监听颜色模式的变化
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        updateBodyId();
+      });
+    });
+</script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div>
+            <a href="https://www.youmeng.me"  class="site-name gt-c-content-color-first">
+                Youmeng
+            </a>
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://www.youmeng.me/post/mei-zhou-ji-zhu-wen-zhang" class="menu gt-a-link">
+                            每周技术阅读
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1766572218032" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    如何写好提示词（Prompt）？
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2024-06-28 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="引言">引言</h2>
+<p>在与人工智能（AI）的互动中，提示词（Prompt）是引导AI理解并回应我们需求的关键。本文将分享一些有效的编写提示词的策略。</p>
+<h2 id="提示词的定义">提示词的定义</h2>
+<p>提示词是告知AI如何理解问题并进行回复的指令。编写良好的提示词可以提升问答体验和交互质量。</p>
+<h2 id="co-star-框架">CO-STAR 框架</h2>
+<p>CO-STAR是一个构建有效提示词的框架，包含以下要素：</p>
+<ul>
+<li><strong>C (Context) 上下文：</strong> 提供任务背景信息。</li>
+<li><strong>O (Objective) 目标：</strong> 明确任务要求。</li>
+<li><strong>S (Style) 风格：</strong> 指定期望的写作风格。</li>
+<li><strong>T (Tone) 语气：</strong> 设置回应的情感语调。</li>
+<li><strong>A (Audience) 受众：</strong> 识别目标受众。</li>
+<li><strong>R (Response) 响应：</strong> 规定输出的格式。</li>
+</ul>
+<h3 id="使用示例">使用示例</h3>
+<p>例如，如果你想为公司的新产品撰写Facebook帖子，可以这样构建提示词：</p>
+<pre><code># CONTEXT（上下文）
+我想推广公司的新产品。我的公司名为 Alpha，新产品名为 Beta，是一款新型超快速吹风机。
+
+# OBJECTIVE（目标）
+帮我创建一条 Facebook 帖子，目的是吸引人们点击产品链接进行购买。
+
+# STYLE（风格）
+参照 Dyson 等成功公司的宣传风格。
+
+# TONE（语调）
+说服性
+
+# AUDIENCE（受众）
+我们公司在 Facebook 上的主要受众是老年人。
+
+# RESPONSE（响应）
+保持 Facebook 帖子简洁而深具影响力。
+</code></pre>
+<h2 id="使用分隔符进行文本分段">使用分隔符进行文本分段</h2>
+<p>分隔符帮助AI辨识提示中的独立意义单元。推荐使用XML标签作为分隔符，因为AI能够理解其结构。</p>
+<h3 id="示例">示例</h3>
+<p>例如，情感分类任务的提示词可以这样构建：</p>
+<pre><code>&lt;classes&gt;
+正面
+负面
+&lt;/classes&gt;
+
+&lt;example-conversations&gt;
+[Agent]: 早上好，今天我能如何帮助您？
+[Customer]: 这个产品太糟糕了...
+&lt;/example-conversations&gt;
+
+&lt;example-classes&gt;
+负面
+正面
+&lt;/example-classes&gt;
+</code></pre>
+<h2 id="利用大语言模型llm的系统提示创建问答机制">利用大语言模型（LLM）的系统提示创建问答机制</h2>
+<p>系统提示是向AI提供的额外指示，帮助AI理解如何回应。</p>
+<h3 id="示例-2">示例</h3>
+<p>系统提示可以这样构建：</p>
+<pre><code>您需要用这段文本来回答问题：[插入文本]。请按照 {&quot;问题&quot;: &quot;答案&quot;} 的格式来回答。
+如果文本信息不足以回答问题，请以&quot;NA&quot;作答。
+</code></pre>
+<h2 id="高阶用法仅用llm分析数据集">高阶用法：仅用LLM分析数据集</h2>
+<p>讨论了LLM在数据分析方面的擅长和不擅长的领域，并提供了一个使用LLM进行客户数据集分析的示例。</p>
+<h3 id="应用llm分析数据集的技巧">应用LLM分析数据集的技巧</h3>
+<ul>
+<li>简化任务为步骤。</li>
+<li>标记并引用中间输出。</li>
+<li>优化响应格式。</li>
+<li>分离任务指令和数据集。</li>
+</ul>
+<h2 id="结论">结论</h2>
+<p>编写有效的提示词可以极大提升与AI的交互体验。通过CO-STAR框架、合理使用分隔符和系统提示，我们可以更精确地指导AI，实现更高质量的对话和任务完成。</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://www.youmeng.me/post/vercelcloudflare-pei-he-rao-guo-vercel-xiang-mu-wu-fa-fang-wen-wen-ti/" class="post-title gt-a-link">
+                    vercel+cloudflare配合绕过vercel项目无法访问问题
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first"> </div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        <a href='https://beian.miit.gov.cn' style="color: var(--gray) !important;">鲁ICP备2023002625号-1</a>
+    </div>
+    <div>
+        Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://www.youmeng.me/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // 使用 fetch 请求 API
+    fetch('https://api.btstu.cn/yan/api.php?charset=utf-8&encode=json')
+      .then(response => response.json()) // 解析 JSON 响应
+      .then(data => {
+        // 获取返回的 text
+        const text = data.text;
+        // 将 text 放入 div.slogan 中
+        const sloganDiv = document.querySelector('div.slogan');
+        if (sloganDiv) {
+          sloganDiv.textContent = text;
+        } else {
+          console.error("div.slogan 元素未找到");
+        }
+      })
+      .catch(error => {
+        console.error('请求失败', error);
+      });
+  });
+
+</script>
+
+    </div>
+</div>
+</body>
+</html>

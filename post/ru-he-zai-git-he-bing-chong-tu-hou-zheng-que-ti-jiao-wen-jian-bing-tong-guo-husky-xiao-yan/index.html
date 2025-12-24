@@ -1,0 +1,272 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>如何在 Git 合并冲突后正确提交文件并通过 Husky 校验 | Youmeng</title>
+
+<link rel="shortcut icon" href="https://www.youmeng.me/favicon.ico?v=1766572218032">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://www.youmeng.me/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<script>
+  document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+      // 检查当前是否为深色模式
+      function isDarkMode() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+
+      // 检查当前是否为浅色模式
+      function isLightMode() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      }
+
+      // 更新body的id根据当前颜色模式
+      function updateBodyId() {
+        const bodyElement = document.body;
+        if (isDarkMode()) {
+          bodyElement.id = 'dark';
+        } else if (isLightMode()) {
+          bodyElement.id = 'light';
+        } else {
+          bodyElement.removeAttribute('id');
+        }
+      }
+
+      // 初始检查和设置body的id
+      updateBodyId();
+
+      // 监听颜色模式的变化
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        updateBodyId();
+      });
+    });
+</script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div>
+            <a href="https://www.youmeng.me"  class="site-name gt-c-content-color-first">
+                Youmeng
+            </a>
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://www.youmeng.me/post/mei-zhou-ji-zhu-wen-zhang" class="menu gt-a-link">
+                            每周技术阅读
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1766572218032" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    如何在 Git 合并冲突后正确提交文件并通过 Husky 校验
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2024-06-07 ·
+                    </time>
+                    
+                        <a href="https://www.youmeng.me/tag/EK1oePRS5/" class="post-tags">
+                            # Git
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <p>在使用 Git 进行团队协作开发时，合并冲突几乎是不可避免的。特别是当你在解决冲突后，准备提交更改时，遇到 Husky 的校验阻止了你的提交，这种情况可能会让人感到困惑和沮丧。今天，我将分享一个详细的指南，帮助你在解决冲突后正确提交更改，同时绕过 Husky 的校验问题。</p>
+<h4 id="问题描述">问题描述</h4>
+<p>假设你正在进行一个 Git 合并操作，结果出现了冲突。你手动解决了这些冲突，并准备提交更改。然而，当你运行 <code>git commit</code> 时，Husky 的预提交钩子（pre-commit hook）阻止了你的提交。这是因为 Husky 在提交之前会执行一些校验，比如代码格式检查、单元测试等。如果这些校验未通过，你的提交就会被阻止。</p>
+<p>更棘手的是，如果你直接运行 <code>git add .</code> 来添加所有变更文件，Git 会将所有文件的变更记录都归到你的名下，这可能不是你想要的结果。那么，如何在解决冲突后正确提交更改，并绕过 Husky 的校验呢？</p>
+<h4 id="解决方案">解决方案</h4>
+<p>下面是一个详细的步骤指南，帮助你解决这个问题：</p>
+<ol>
+<li>
+<p><strong>解决冲突</strong>：<br>
+首先，在你的代码编辑器中手动解决冲突文件中的冲突部分。确保每个冲突都被妥善处理。</p>
+</li>
+<li>
+<p><strong>标记解决冲突的文件</strong>：<br>
+使用 <code>git add &lt;filename&gt;</code> 来标记你已经解决冲突的文件。这一步不会影响你的提交历史，只是告诉 Git 这些冲突已经解决了。</p>
+<pre><code class="language-bash">git add &lt;filename&gt;
+</code></pre>
+</li>
+<li>
+<p><strong>继续合并过程</strong>：<br>
+接下来，你需要完成合并过程。你可以使用 <code>git merge --continue</code> 或 <code>git commit</code> 来完成合并。</p>
+<pre><code class="language-bash">git merge --continue
+</code></pre>
+<p>或者：</p>
+<pre><code class="language-bash">git commit
+</code></pre>
+</li>
+<li>
+<p><strong>绕过 Husky 的校验</strong>：<br>
+如果 Husky 的钩子阻止了你的提交，你可以使用 <code>--no-verify</code> 标志来绕过这些钩子。这是一个非常有用的选项，特别是在你确信你的更改是正确的情况下。</p>
+<pre><code class="language-bash">git commit --no-verify
+</code></pre>
+</li>
+<li>
+<p><strong>提交记录变更</strong>：<br>
+最后，如果你担心所有文件的变更记录都变成你的提交，你可以在解决冲突后使用 <code>git commit --no-verify</code> 提交解决冲突的更改，然后再进行其他的提交操作。</p>
+</li>
+</ol>
+<h4 id="完整步骤总结">完整步骤总结</h4>
+<ol>
+<li>手动解决冲突。</li>
+<li>使用 <code>git add &lt;filename&gt;</code> 标记解决冲突的文件。</li>
+<li>使用 <code>git commit --no-verify</code> 来提交解决冲突的更改。</li>
+</ol>
+<p>通过这几个简单的步骤，你可以确保在解决冲突后正确提交文件，同时绕过 Husky 的校验。这不仅可以让你的工作流程更加顺畅，还能确保你的代码库保持干净和有序。</p>
+<p>希望这个指南对你有所帮助！如果你有任何问题或建议，欢迎在评论区留言讨论。Happy coding!</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://www.youmeng.me/post/chun-css-shi-xian-wen-ben-jie-duan-de-liang-chong-fang-fa/" class="post-title gt-a-link">
+                    纯CSS 实现文本强制截断并且不显示省略号的两种方法
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first"> </div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        <a href='https://beian.miit.gov.cn' style="color: var(--gray) !important;">鲁ICP备2023002625号-1</a>
+    </div>
+    <div>
+        Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://www.youmeng.me/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // 使用 fetch 请求 API
+    fetch('https://api.btstu.cn/yan/api.php?charset=utf-8&encode=json')
+      .then(response => response.json()) // 解析 JSON 响应
+      .then(data => {
+        // 获取返回的 text
+        const text = data.text;
+        // 将 text 放入 div.slogan 中
+        const sloganDiv = document.querySelector('div.slogan');
+        if (sloganDiv) {
+          sloganDiv.textContent = text;
+        } else {
+          console.error("div.slogan 元素未找到");
+        }
+      })
+      .catch(error => {
+        console.error('请求失败', error);
+      });
+  });
+
+</script>
+
+    </div>
+</div>
+</body>
+</html>

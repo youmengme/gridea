@@ -1,0 +1,309 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>如何通过飞书API获取多维表格数据 | Youmeng</title>
+
+<link rel="shortcut icon" href="https://www.youmeng.me/favicon.ico?v=1766572218032">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://www.youmeng.me/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<script>
+  document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+      // 检查当前是否为深色模式
+      function isDarkMode() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+
+      // 检查当前是否为浅色模式
+      function isLightMode() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      }
+
+      // 更新body的id根据当前颜色模式
+      function updateBodyId() {
+        const bodyElement = document.body;
+        if (isDarkMode()) {
+          bodyElement.id = 'dark';
+        } else if (isLightMode()) {
+          bodyElement.id = 'light';
+        } else {
+          bodyElement.removeAttribute('id');
+        }
+      }
+
+      // 初始检查和设置body的id
+      updateBodyId();
+
+      // 监听颜色模式的变化
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        updateBodyId();
+      });
+    });
+</script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div>
+            <a href="https://www.youmeng.me"  class="site-name gt-c-content-color-first">
+                Youmeng
+            </a>
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://www.youmeng.me/post/mei-zhou-ji-zhu-wen-zhang" class="menu gt-a-link">
+                            每周技术阅读
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1766572218032" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    如何通过飞书API获取多维表格数据
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2024-06-25 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <p>飞书（Feishu）作为一款强大的企业协作工具，提供了开放API，允许开发者通过程序访问和操作多维表格（Bitable）数据。本文将介绍如何通过飞书API获取多维表格数据。</p>
+<h4 id="步骤一注册开发者账号和获取api凭证">步骤一：注册开发者账号和获取API凭证</h4>
+<p>首先，需要在飞书开发者平台上注册一个开发者账号，并创建一个应用。完成注册后，你会获得两个重要的凭证：App ID和App Secret。</p>
+<h4 id="步骤二获取访问令牌">步骤二：获取访问令牌</h4>
+<p>接下来，使用App ID和App Secret获取访问令牌（Access Token）。发送POST请求到飞书的认证接口：</p>
+<pre><code class="language-json">POST https://open.feishu.cn/open-apis/auth/v3/app_access_token/internal/
+{
+    &quot;app_id&quot;: &quot;your_app_id&quot;,
+    &quot;app_secret&quot;: &quot;your_app_secret&quot;
+}
+</code></pre>
+<p>飞书会返回一个响应，其中包含访问令牌：</p>
+<pre><code class="language-json">{
+    &quot;code&quot;: 0,
+    &quot;msg&quot;: &quot;ok&quot;,
+    &quot;app_access_token&quot;: &quot;your_access_token&quot;,
+    &quot;expire&quot;: 7200
+}
+</code></pre>
+<p>这个访问令牌有效期为7200秒（2小时），需要定期刷新。</p>
+<h4 id="步骤三获取表格数据">步骤三：获取表格数据</h4>
+<p>使用获取到的访问令牌，调用多维表格API来获取表格数据。发送GET请求到飞书的多维表格数据接口：</p>
+<pre><code class="language-http">GET https://open.feishu.cn/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records
+Host: open.feishu.cn
+Authorization: Bearer your_access_token
+</code></pre>
+<p>其中，<code>app_token</code>是应用标识，<code>table_id</code>是表格ID。请求头中包含访问令牌。</p>
+<p>飞书会返回一个包含表格数据的响应：</p>
+<pre><code class="language-json">{
+    &quot;code&quot;: 0,
+    &quot;msg&quot;: &quot;ok&quot;,
+    &quot;data&quot;: {
+        &quot;items&quot;: [
+            {
+                &quot;record_id&quot;: &quot;recxxxxxxx&quot;,
+                &quot;fields&quot;: {
+                    &quot;字段名1&quot;: &quot;值1&quot;,
+                    &quot;字段名2&quot;: &quot;值2&quot;
+                }
+            },
+            ...
+        ]
+    }
+}
+</code></pre>
+<h4 id="示例代码">示例代码</h4>
+<p>以下是一个使用Python和<code>requests</code>库的示例代码，帮助你快速上手：</p>
+<pre><code class="language-python">import requests
+
+# 获取访问令牌
+def get_access_token(app_id, app_secret):
+    url = &quot;https://open.feishu.cn/open-apis/auth/v3/app_access_token/internal/&quot;
+    payload = {
+        &quot;app_id&quot;: app_id,
+        &quot;app_secret&quot;: app_secret
+    }
+    response = requests.post(url, json=payload)
+    return response.json().get(&quot;app_access_token&quot;)
+
+# 获取表格数据
+def get_table_data(app_token, table_id, access_token):
+    url = f&quot;https://open.feishu.cn/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records&quot;
+    headers = {
+        &quot;Authorization&quot;: f&quot;Bearer {access_token}&quot;
+    }
+    response = requests.get(url, headers=headers)
+    return response.json()
+
+# 替换为你的App ID和App Secret
+app_id = &quot;your_app_id&quot;
+app_secret = &quot;your_app_secret&quot;
+app_token = &quot;your_app_token&quot;
+table_id = &quot;your_table_id&quot;
+
+# 获取访问令牌
+access_token = get_access_token(app_id, app_secret)
+
+# 获取表格数据
+table_data = get_table_data(app_token, table_id, access_token)
+print(table_data)
+</code></pre>
+<p>将上面的代码复制到你的Python环境中，替换相应的App ID、App Secret、App Token和Table ID，即可获取飞书多维表格的数据。</p>
+<h4 id="总结">总结</h4>
+<p>通过飞书API获取多维表格数据的过程包括注册开发者账号、获取访问令牌和调用API获取数据。希望本文能帮助你更好地理解和使用飞书的API，提高工作效率。如果你有任何问题或建议，欢迎在评论区留言交流。</p>
+<hr>
+<p>希望这篇文章能够更符合你的要求。</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://www.youmeng.me/post/shen-ru-li-jie-promisewithresolvers-yu-dan-li-api-bao-zhuang-chu-li-chong-fu-qing-qiu/" class="post-title gt-a-link">
+                    深入理解 `promiseWithResolvers` 与单例 API 包装处理重复请求
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first"> </div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        <a href='https://beian.miit.gov.cn' style="color: var(--gray) !important;">鲁ICP备2023002625号-1</a>
+    </div>
+    <div>
+        Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://www.youmeng.me/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // 使用 fetch 请求 API
+    fetch('https://api.btstu.cn/yan/api.php?charset=utf-8&encode=json')
+      .then(response => response.json()) // 解析 JSON 响应
+      .then(data => {
+        // 获取返回的 text
+        const text = data.text;
+        // 将 text 放入 div.slogan 中
+        const sloganDiv = document.querySelector('div.slogan');
+        if (sloganDiv) {
+          sloganDiv.textContent = text;
+        } else {
+          console.error("div.slogan 元素未找到");
+        }
+      })
+      .catch(error => {
+        console.error('请求失败', error);
+      });
+  });
+
+</script>
+
+    </div>
+</div>
+</body>
+</html>
